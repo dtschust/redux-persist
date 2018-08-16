@@ -42,15 +42,20 @@ export default function createPersistoid(config: PersistConfig): Persistoid {
       }
     })
 
+    lastState = state
+
     // start the time iterator if not running (read: throttle)
     if (timeIterator === null) {
-      timeIterator = setInterval(processNextKey, throttle)
+      if (throttle === 0) {
+        const runSynchronously = true
+        processNextKey(runSynchronously)
+      } else {
+        timeIterator = setInterval(processNextKey, throttle)
+      }
     }
-
-    lastState = state
   }
 
-  function processNextKey() {
+  function processNextKey(runSynchronously) {
     if (keysToProcess.length === 0) {
       if (timeIterator) clearInterval(timeIterator)
       timeIterator = null
@@ -78,6 +83,10 @@ export default function createPersistoid(config: PersistConfig): Persistoid {
 
     if (keysToProcess.length === 0) {
       writeStagedState()
+    }
+
+    if (runSynchronously) {
+      processNextKey(runSynchronously)
     }
   }
 
@@ -110,7 +119,8 @@ export default function createPersistoid(config: PersistConfig): Persistoid {
 
   const flush = () => {
     while (keysToProcess.length !== 0) {
-      processNextKey()
+      const runSynchronously = throttle === 0 ? true : false
+      processNextKey(runSynchronously)
     }
     return writePromise || Promise.resolve()
   }
