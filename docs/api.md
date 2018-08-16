@@ -59,6 +59,7 @@ The Persistor is a redux store unto itself, plus
   migrate?: (Object, number) => Promise<Object>,
   transforms?: Array<Transform>,
   throttle?: number, // ms to throttle state writes
+  synchronousWrites?: boolean, // update the storage engine synchronously, instead of relying on a setInterval of throttle config value
   keyPrefix?: string, // will be prefixed to the storage key
   debug?: boolean, // true -> verbose logs
   stateReconciler?: false | StateReconciler, // false -> do not automatically reconcile state

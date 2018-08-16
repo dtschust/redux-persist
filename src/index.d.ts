@@ -122,6 +122,7 @@ declare module "redux-persist/es/types" {
         whitelist?: Array<string>;
         transforms?: Array<Transform<any, any>>;
         throttle?: number;
+        synchronousWrites?: boolean,
         migrate?: (state: PersistedState, versionKey: number) => Promise<PersistedState>;
         stateReconciler?: false | Function;
         /**

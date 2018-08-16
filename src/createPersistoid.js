@@ -11,6 +11,7 @@ export default function createPersistoid(config: PersistConfig): Persistoid {
   const blacklist: ?Array<string> = config.blacklist || null
   const whitelist: ?Array<string> = config.whitelist || null
   const transforms = config.transforms || []
+  const synchronousWrites = config.synchronousWrites || false
   const throttle = config.throttle || 0
   const storageKey = `${
     config.keyPrefix !== undefined ? config.keyPrefix : KEY_PREFIX
@@ -42,15 +43,19 @@ export default function createPersistoid(config: PersistConfig): Persistoid {
       }
     })
 
-    // start the time iterator if not running (read: throttle)
-    if (timeIterator === null) {
-      timeIterator = setInterval(processNextKey, throttle)
-    }
-
     lastState = state
+
+    if (synchronousWrites) {
+      processNextKey(synchronousWrites)
+    } else {
+      // start the time iterator if not running (read: throttle)
+      if (timeIterator === null) {
+        timeIterator = setInterval(processNextKey, throttle)
+      }
+    }
   }
 
-  function processNextKey() {
+  function processNextKey(runSynchronously) {
     if (keysToProcess.length === 0) {
       if (timeIterator) clearInterval(timeIterator)
       timeIterator = null
@@ -78,6 +83,10 @@ export default function createPersistoid(config: PersistConfig): Persistoid {
 
     if (keysToProcess.length === 0) {
       writeStagedState()
+    }
+
+    if (runSynchronously) {
+      processNextKey(runSynchronously)
     }
   }
 
@@ -110,7 +119,7 @@ export default function createPersistoid(config: PersistConfig): Persistoid {
 
   const flush = () => {
     while (keysToProcess.length !== 0) {
-      processNextKey()
+      processNextKey(synchronousWrites)
     }
     return writePromise || Promise.resolve()
   }
