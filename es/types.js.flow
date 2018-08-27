@@ -19,6 +19,7 @@ export type PersistConfig = {
   whitelist?: Array<string>,
   transforms?: Array<Transform>,
   throttle?: number,
+  synchronousWrites?: boolean,
   migrate?: (PersistedState, number) => Promise<PersistedState>,
   stateReconciler?: false | Function,
   getStoredState?: PersistConfig => Promise<PersistedState>, // used for migrations

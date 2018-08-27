@@ -7,6 +7,7 @@ export default function createPersistoid(config) {
   var blacklist = config.blacklist || null;
   var whitelist = config.whitelist || null;
   var transforms = config.transforms || [];
+  var synchronousWrites = config.synchronousWrites || false;
   var throttle = config.throttle || 0;
   var storageKey = '' + (config.keyPrefix !== undefined ? config.keyPrefix : KEY_PREFIX) + config.key;
   var storage = config.storage;
@@ -38,15 +39,19 @@ export default function createPersistoid(config) {
       }
     });
 
-    // start the time iterator if not running (read: throttle)
-    if (timeIterator === null) {
-      timeIterator = setInterval(processNextKey, throttle);
-    }
-
     lastState = state;
+
+    if (synchronousWrites) {
+      processNextKey(synchronousWrites);
+    } else {
+      // start the time iterator if not running (read: throttle)
+      if (timeIterator === null) {
+        timeIterator = setInterval(processNextKey, throttle);
+      }
+    }
   };
 
-  function processNextKey() {
+  function processNextKey(runSynchronously) {
     if (keysToProcess.length === 0) {
       if (timeIterator) clearInterval(timeIterator);
       timeIterator = null;
@@ -71,6 +76,10 @@ export default function createPersistoid(config) {
 
     if (keysToProcess.length === 0) {
       writeStagedState();
+    }
+
+    if (runSynchronously) {
+      processNextKey(runSynchronously);
     }
   }
 
@@ -100,7 +109,7 @@ export default function createPersistoid(config) {
 
   var flush = function flush() {
     while (keysToProcess.length !== 0) {
-      processNextKey();
+      processNextKey(synchronousWrites);
     }
     return writePromise || Promise.resolve();
   };
