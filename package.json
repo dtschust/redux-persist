@@ -24,7 +24,7 @@
     "clean": "rimraf es && rimraf lib",
     "flow-copy": "flow-copy-source src es && flow-copy-source src lib",
     "precommit": "lint-staged",
-    "prepush": "echo 'Building assets before pushing' && npm run build && git add . && (git diff-index --quiet HEAD || git commit -am'Build assets')",
+    "prepush": "./scripts/prepush.sh",
     "stats:size": "node ./scripts/size-estimator.js",
     "test": "flow && cross-env BABEL_ENV=commonjs ava",
     "version": "npm run clean && npm run build && npm run stats:size | tail -1 >> LIBSIZE.md && git add LIBSIZE.md"
