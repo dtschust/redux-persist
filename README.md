@@ -1,3 +1,5 @@
+# This is a slack internal fork of [redux-persist](https://github.com/rt2zz/redux-persist)
+
 # Redux Persist
 
 Persist and rehydrate a redux store.
