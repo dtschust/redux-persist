@@ -1,0 +1,11 @@
+{
+	"checkpoint": {
+		"reviews_enabled": true,
+		"notifications": {
+			"dm": true
+		}
+	},
+	"cibot": {
+		"tests": []
+	}
+}
